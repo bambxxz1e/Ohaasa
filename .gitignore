@@ -1,0 +1,27 @@
+# Eclipse metadata
+.metadata/
+.classpath
+.project
+.settings/
+
+# Build output
+bin/
+target/
+out/
+
+# Eclipse/Mylyn, OSGi, Refactorings 등
+*.log
+*.lock
+*.prefs
+*.index
+*.xml.zip
+*.ser
+*.dat
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+.classpath
+.project
+.settings/
