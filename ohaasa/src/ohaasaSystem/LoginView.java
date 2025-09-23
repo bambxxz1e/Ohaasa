@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import model.User;
 
 public class LoginView extends JFrame {
     private JTextField usernameField;
@@ -13,8 +14,10 @@ public class LoginView extends JFrame {
     private JTextField birthField;
     private JButton signupButton;
     private JButton loginButton;
+    private DBManager dbmanager;
     
     public LoginView() {
+    	this.dbmanager = new DBManager();
         initializeComponents();
         setupLayout();
         setupEventHandlers();
@@ -185,15 +188,17 @@ public class LoginView extends JFrame {
             return;
         }
         
-        // 임시 로그인 검증 (나중에 DB 연결로 대체)
-        if (!isValidLogin(username, password, birth)) {
+        // 회원가입 처리
+        if (dbmanager.registerUser(username, password, birth)) {
             JOptionPane.showMessageDialog(this, "회원가입 성공!", "성공", JOptionPane.INFORMATION_MESSAGE);
-            // 여기서 메인 화면으로 이동하는 코드 추가
-            dispose(); // 로그인 창 닫기
-            // new MainView(); // 메인 화면 호출 (나중에 구현)
-        } else {
-            JOptionPane.showMessageDialog(this, "이미 존재하는 계정입니다.", "회원가입 실패", JOptionPane.ERROR_MESSAGE);
+            // 필드 초기화
+            usernameField.setText("");
+            passwordField.setText("");
+            birthField.setText("YYMMDD");
+            birthField.setForeground(Color.GRAY);
             usernameField.requestFocus();
+        } else {
+            JOptionPane.showMessageDialog(this, "회원가입 중 오류가 발생했습니다.", "회원가입 실패", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -226,22 +231,21 @@ public class LoginView extends JFrame {
             return;
         }
         
-        // 임시 로그인 검증 (나중에 DB 연결로 대체)
-        if (isValidLogin(username, password, birth)) {
-            JOptionPane.showMessageDialog(this, "로그인 성공!", "성공", JOptionPane.INFORMATION_MESSAGE);
-            // 여기서 메인 화면으로 이동하는 코드 추가
+        // 로그인 검증
+        if (dbmanager.validateLogin(username, password, birth)) {
+            // 사용자 정보 가져오기
+            User currentUser = dbmanager.getUserInfo(username);
+            
+            JOptionPane.showMessageDialog(this, 
+                "로그인 성공!\n별자리: " + currentUser.getZodiacSign(), 
+                "성공", JOptionPane.INFORMATION_MESSAGE);
+            
             dispose(); // 로그인 창 닫기
-            // new MainView(); // 메인 화면 호출 (나중에 구현)
+            // new MainView(currentUser); // 메인 화면 호출 (사용자 정보 전달)
         } else {
             JOptionPane.showMessageDialog(this, "입력 정보가 잘못되었습니다.", "로그인 실패", JOptionPane.ERROR_MESSAGE);
             passwordField.setText(""); // 비밀번호 필드 초기화
             usernameField.requestFocus();
         }
-    }
-    
-    // 임시 로그인 검증 메소드 (나중에 DB 연결로 대체)
-    private boolean isValidLogin(String username, String password, String birth) {
-        // 테스트용 계정: admin / admin123 / 080121
-        return "admin".equals(username) && "admin123".equals(password) && "080121".equals(birth);
     }
 }

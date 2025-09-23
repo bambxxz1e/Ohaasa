@@ -25,3 +25,5 @@ Thumbs.db
 .classpath
 .project
 .settings/
+
+db.properties
