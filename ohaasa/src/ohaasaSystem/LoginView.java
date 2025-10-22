@@ -29,6 +29,10 @@ public class LoginView extends JFrame {
         setLocationRelativeTo(null); // 화면 중앙에 위치
         setResizable(false);
         setVisible(true);
+        
+        // 메세지 창 폰트 설정
+        UIManager.put("OptionPane.messageFont", new Font("Pretendard", Font.PLAIN, 14));
+        UIManager.put("OptionPane.buttonFont", new Font("Pretendard", Font.BOLD, 12));
     }
     
     private void initializeComponents() {
@@ -78,7 +82,7 @@ public class LoginView extends JFrame {
         
         // 제목 라벨
         JLabel titleLabel = new JLabel("시스템 로그인", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
+        titleLabel.setFont(new Font("Pretendard", Font.BOLD, 18));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         // 사용자명 패널
@@ -86,6 +90,7 @@ public class LoginView extends JFrame {
         usernamePanel.setBackground(Color.WHITE);
         JLabel usernameLabel = new JLabel("아이디 :");
         usernameLabel.setPreferredSize(new Dimension(80, 25));
+        usernameLabel.setFont(new Font("Pretendard", Font.BOLD, 13));
         usernamePanel.add(usernameLabel);
         usernamePanel.add(usernameField);
         
@@ -94,6 +99,7 @@ public class LoginView extends JFrame {
         passwordPanel.setBackground(Color.WHITE);
         JLabel passwordLabel = new JLabel("비밀번호 :");
         passwordLabel.setPreferredSize(new Dimension(80, 25));
+        passwordLabel.setFont(new Font("Pretendard", Font.BOLD, 13));
         passwordPanel.add(passwordLabel);
         passwordPanel.add(passwordField);
         
@@ -102,14 +108,21 @@ public class LoginView extends JFrame {
         birthPanel.setBackground(Color.WHITE);
         JLabel birthLabel = new JLabel("생년월일 :");
         birthLabel.setPreferredSize(new Dimension(80, 25));
+        birthLabel.setFont(new Font("Pretendard", Font.BOLD, 13));
         birthPanel.add(birthLabel);
         birthPanel.add(birthField);
         
         // 버튼 패널
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.setBackground(Color.WHITE);
-        buttonPanel.add(signupButton);
-        buttonPanel.add(loginButton);
+
+		Font buttonFont = new Font("Pretendard", Font.PLAIN, 12);
+		
+		signupButton.setFont(buttonFont);
+		loginButton.setFont(buttonFont);
+		
+		buttonPanel.add(signupButton);
+		buttonPanel.add(loginButton);
         
         // 컴포넌트들을 메인 패널에 추가
         mainPanel.add(titleLabel);
@@ -188,6 +201,24 @@ public class LoginView extends JFrame {
             return;
         }
         
+        // 숫자인지
+        if (!birth.matches("\\d{6}")) {
+            JOptionPane.showMessageDialog(this, "생년월일은 숫자만 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
+            birthField.requestFocus();
+            return;
+        }
+        
+        // 월, 일 추출
+        int month = Integer.parseInt(birth.substring(2, 4));
+        int day = Integer.parseInt(birth.substring(4, 6));
+
+        // 월, 일 유효성 검사
+        if (month < 1 || month > 12 || day < 1 || day > 31) {
+            JOptionPane.showMessageDialog(this, "생년월일을 바르게 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
+            birthField.requestFocus();
+            return;
+        }
+        
         // 회원가입 처리
         if (dbmanager.registerUser(username, password, birth)) {
             JOptionPane.showMessageDialog(this, "회원가입 성공!", "성공", JOptionPane.INFORMATION_MESSAGE);
@@ -233,15 +264,15 @@ public class LoginView extends JFrame {
         
         // 로그인 검증
         if (dbmanager.validateLogin(username, password, birth)) {
-            // 사용자 정보 가져오기
-            User currentUser = dbmanager.getUserInfo(username);
-            
+        	User currentUser = dbmanager.getUserInfo(username);
+        	
             JOptionPane.showMessageDialog(this, 
-                "로그인 성공!\n별자리: " + currentUser.getZodiacSign(), 
+                "로그인 성공!", 
                 "성공", JOptionPane.INFORMATION_MESSAGE);
             
             dispose(); // 로그인 창 닫기
-            // new MainView(currentUser); // 메인 화면 호출 (사용자 정보 전달)
+            new MainView(currentUser); // 메인 화면 호출 (사용자 정보 전달)
+            new RankView(currentUser);
         } else {
             JOptionPane.showMessageDialog(this, "입력 정보가 잘못되었습니다.", "로그인 실패", JOptionPane.ERROR_MESSAGE);
             passwordField.setText(""); // 비밀번호 필드 초기화
