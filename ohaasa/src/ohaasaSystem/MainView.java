@@ -85,28 +85,46 @@ public class MainView extends JFrame {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // 하단 안내 문구
+     // 하단 안내 문구
         JLabel tipLabel = new JLabel("행복한 하루 보내세요!", SwingConstants.CENTER);
         tipLabel.setFont(new Font("Pretendard", Font.ITALIC, 13));
         tipLabel.setForeground(Color.GRAY);
         tipLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        
+
+        // 버튼 2개 생성
         JButton goRankButton = new JButton("전체 순위 보러가기");
         goRankButton.setFont(new Font("Pretendard", Font.BOLD, 14));
-        goRankButton.setBackground(new Color(200, 230, 255));
-        goRankButton.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        goRankButton.setBackground(new Color(170, 210, 250));
         goRankButton.setFocusPainted(false);
         goRankButton.addActionListener(e -> {
             new RankView(currentUser).setVisible(true);
-            dispose(); // 현재 창 닫기
+            dispose();
         });
-        
+
+        JButton goCalendarButton = new JButton("캘린더 보기");
+        goCalendarButton.setFont(new Font("Pretendard", Font.BOLD, 14));
+        goCalendarButton.setBackground(new Color(170, 210, 250));
+        goCalendarButton.setFocusPainted(false);
+        goCalendarButton.addActionListener(e -> {
+            new CalendarView(currentUser).setVisible(true);
+            dispose();
+        });
+
+        // 버튼들을 담을 패널 (1행 2열로 반반 배치)
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 10, 40));
+        buttonPanel.add(goRankButton);
+        buttonPanel.add(goCalendarButton);
+
+        // 하단 전체 구성
         JPanel southPanel = new JPanel(new BorderLayout());
         southPanel.setBackground(Color.WHITE);
         southPanel.add(tipLabel, BorderLayout.NORTH);
-        southPanel.add(goRankButton, BorderLayout.SOUTH);
+        southPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(southPanel, BorderLayout.SOUTH);
+
     }
     
 //    // 실행 테스트

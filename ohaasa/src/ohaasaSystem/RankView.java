@@ -96,26 +96,44 @@ public class RankView extends JFrame {
         tipLabel.setFont(new Font("Pretendard", Font.ITALIC, 12));
         tipLabel.setForeground(Color.GRAY);
         tipLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        
+
+        // 버튼 2개 생성
         JButton goMainButton = new JButton("나의 오하아사 확인하기");
         goMainButton.setFont(new Font("Pretendard", Font.BOLD, 14));
-        goMainButton.setBackground(new Color(200, 230, 255));
-        goMainButton.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        goMainButton.setBackground(new Color(170, 210, 250));
         goMainButton.setFocusPainted(false);
         goMainButton.addActionListener(e -> {
             new MainView(currentUser).setVisible(true);
             dispose();
         });
-        
+
+        JButton goCalendarButton = new JButton("캘린더 보기");
+        goCalendarButton.setFont(new Font("Pretendard", Font.BOLD, 14));
+        goCalendarButton.setBackground(new Color(170, 210, 250));
+        goCalendarButton.setFocusPainted(false);
+        goCalendarButton.addActionListener(e -> {
+        	new CalendarView(currentUser).setVisible(true);
+            dispose();
+        });
+
+        // 버튼 영역 패널 (1행 2열)
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 10, 40));
+        buttonPanel.add(goMainButton);
+        buttonPanel.add(goCalendarButton);
+
+        // 하단 전체 패널
         JPanel southPanel = new JPanel(new BorderLayout());
         southPanel.setBackground(Color.WHITE);
         southPanel.add(tipLabel, BorderLayout.NORTH);
-        southPanel.add(goMainButton, BorderLayout.SOUTH);
+        southPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // 레이아웃 구성
+        add(southPanel, BorderLayout.SOUTH);
+        
         setLayout(new BorderLayout());
         add(titleLabel, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER); // ✅ 이 줄 반드시 추가!!
         add(southPanel, BorderLayout.SOUTH);
     }
     

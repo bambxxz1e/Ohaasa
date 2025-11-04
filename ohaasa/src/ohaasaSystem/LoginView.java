@@ -251,19 +251,8 @@ public class LoginView extends JFrame {
             return;
         }
         
-        if (birth.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "생년월일을 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
-            passwordField.requestFocus();
-            return;
-        }
-        else if(birth.length() != 6) {
-        	JOptionPane.showMessageDialog(this, "생년월일은 6자리로 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
-            passwordField.requestFocus();
-            return;
-        }
-        
         // 로그인 검증
-        if (dbmanager.validateLogin(username, password, birth)) {
+        if (dbmanager.validateLogin(username, password)) {
         	User currentUser = dbmanager.getUserInfo(username);
         	
             JOptionPane.showMessageDialog(this, 
@@ -272,7 +261,6 @@ public class LoginView extends JFrame {
             
             dispose(); // 로그인 창 닫기
             new MainView(currentUser); // 메인 화면 호출 (사용자 정보 전달)
-            new RankView(currentUser);
         } else {
             JOptionPane.showMessageDialog(this, "입력 정보가 잘못되었습니다.", "로그인 실패", JOptionPane.ERROR_MESSAGE);
             passwordField.setText(""); // 비밀번호 필드 초기화

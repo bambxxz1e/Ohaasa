@@ -1,9 +1,11 @@
 package ohaasaSystem;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.Properties;
 import java.io.InputStream;
 import model.User;
+import model.DiaryEntry;
 
 public class DBManager {
     private static String URL;
@@ -42,7 +44,7 @@ public class DBManager {
         String sql = "INSERT INTO users (user_id, password, birth_date, zodiac_sign) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        	PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             // User 객체 생성해서 별자리 계산
             User user = new User(userId, password, birthDate);
@@ -62,15 +64,14 @@ public class DBManager {
     }
     
     // 로그인 검증
-    public boolean validateLogin(String userId, String password, String birthDate) {
-        String sql = "SELECT * FROM users WHERE user_id = ? AND password = ? AND birth_date = ?";
+    public boolean validateLogin(String userId, String password) {
+        String sql = "SELECT * FROM users WHERE user_id = ? AND password = ?";
         
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        	PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, userId);
             stmt.setString(2, password);
-            stmt.setString(3, birthDate);
             
             ResultSet rs = stmt.executeQuery();
             return rs.next(); // 결과가 있으면 true, 없으면 false
@@ -86,7 +87,7 @@ public class DBManager {
         String sql = "SELECT * FROM users WHERE user_id = ?";
         
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        	PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, userId);
             ResultSet rs = stmt.executeQuery();
@@ -112,7 +113,7 @@ public class DBManager {
         String sql = "SELECT user_id FROM users WHERE user_id = ?";
         
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        	PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, userId);
             ResultSet rs = stmt.executeQuery();
@@ -123,4 +124,89 @@ public class DBManager {
             return false;
         }
     }
+    
+    // 일기 저장
+    public boolean saveDiary(String userId, LocalDate date, String content, String imagePath,
+            String zodiacSign, int rank, String advice, String action) {
+		String sql = """
+		INSERT INTO diaries (user_id, diary_date, content, image_path, zodiac_sign, horoscope_rank, horoscope_advice, horoscope_action)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		ON DUPLICATE KEY UPDATE
+		content = VALUES(content),
+		image_path = VALUES(image_path),
+		zodiac_sign = VALUES(zodiac_sign),
+		horoscope_rank = VALUES(horoscope_rank),
+		horoscope_advice = VALUES(horoscope_advice),
+		horoscope_action = VALUES(horoscope_action)
+		""";
+		
+		try (Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, userId);
+			pstmt.setDate(2, Date.valueOf(date));
+			pstmt.setString(3, content);
+			pstmt.setString(4, imagePath);
+			pstmt.setString(5, zodiacSign);
+			pstmt.setInt(6, rank);
+			pstmt.setString(7, advice);
+			pstmt.setString(8, action);
+			
+			pstmt.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		return false;
+		}
+	}
+    
+    // 다이어리 불러오기
+    public DiaryEntry getDiaryEntry(String userId, LocalDate date) {
+        String sql = """
+            SELECT content, image_path, zodiac_sign, horoscope_rank, horoscope_advice, horoscope_action
+            FROM diaries WHERE user_id = ? AND diary_date = ?
+            """;
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, userId);
+            pstmt.setDate(2, Date.valueOf(date));
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                DiaryEntry entry = new DiaryEntry();
+                entry.setText(rs.getString("content"));
+                entry.setImagePath(rs.getString("image_path"));
+                entry.setZodiacSign(rs.getString("zodiac_sign"));
+                entry.setHoroscopeRank(rs.getInt("horoscope_rank"));
+                entry.setAdvice(rs.getString("horoscope_advice"));
+                entry.setAction(rs.getString("horoscope_action"));
+                return entry;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // 특정 날짜 일기 조회
+    public String getDiary(String userId, LocalDate date) {
+        String sql = "SELECT content FROM diaries WHERE user_id=? AND diary_date=?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, userId);
+            stmt.setDate(2, Date.valueOf(date));
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("content");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("일기 조회 실패: " + e.getMessage());
+        }
+        return null; // 일기가 없는 경우
+    }
+
 }
