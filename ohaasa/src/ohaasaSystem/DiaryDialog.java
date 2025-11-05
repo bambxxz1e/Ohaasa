@@ -6,11 +6,12 @@ import data.HoroscopeData;
 
 import javax.swing.*;
 
+import java.util.List;
+import java.util.Optional;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class DiaryDialog extends JDialog {
 
@@ -45,17 +46,20 @@ public class DiaryDialog extends JDialog {
         dateLabel.setFont(new Font("Pretendard", Font.BOLD, 18));
         dateLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 5, 0));
 
-        // 사용자 별자리 운세 불러오기
+        // 오늘 운세 DB에서 가져오기
+        List<Horoscope> todayHoroscopes = new HoroscopeData().getTodayHoroscopes();;
+
+        // 사용자 별자리 운세 찾기
         String zodiac = currentUser.getZodiacSign();
-        Optional<Horoscope> opt = HoroscopeData.getDummyData().stream()
+        Optional<Horoscope> opt = todayHoroscopes.stream()
                 .filter(h -> h.getZodiacSign().equals(zodiac))
                 .findFirst();
 
         String horoscopeText = "";
         if (opt.isPresent()) {
             Horoscope h = opt.get();
-            horoscopeText = String.format("%d위 %s\n\n[조언]\n%s\n\n[행운의 행동]\n%s",
-            		h.getRank(), h.getZodiacSign(), h.getAdvice(), h.getAction());
+            horoscopeText = String.format("%d위 %s\n\n[조언]\n%s",
+            		h.getRank(), h.getZodiacSign(), h.getAdvice());
         }
 
         JTextArea horoscopeArea = new JTextArea(horoscopeText);
@@ -134,16 +138,18 @@ public class DiaryDialog extends JDialog {
         // 이미지 경로 처리
         String imagePath = selectedImage != null ? selectedImage.getAbsolutePath() : null;
 
-        // 별자리 + 운세 정보
-        String zodiac = currentUser.getZodiacSign();
-        Horoscope h = HoroscopeData.getDummyData().stream()
-                     .filter(hor -> hor.getZodiacSign().equals(zodiac))
-                     .findFirst()
-                     .orElse(null);
+        // 오늘자 운세 리스트 가져오기
+        List<Horoscope> todayHoroscopes = new HoroscopeData().getTodayHoroscopes();
 
+        // 사용자 별자리 운세 찾기
+        String zodiac = currentUser.getZodiacSign();
+        Horoscope h = todayHoroscopes.stream()
+                        .filter(hor -> hor.getZodiacSign().equals(zodiac))
+                        .findFirst()
+                        .orElse(null);
+        
         int rank = h != null ? h.getRank() : 0;
         String advice = h != null ? h.getAdvice() : "";
-        String action = h != null ? h.getAction() : "";
 
         // DB 저장 (확장된 saveDiary 메소드)
         boolean success = dbManager.saveDiary(
@@ -153,8 +159,7 @@ public class DiaryDialog extends JDialog {
             imagePath,
             zodiac,
             rank,
-            advice,
-            action
+            advice
         );
 
         if (success) {

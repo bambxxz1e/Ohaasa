@@ -1,10 +1,11 @@
 package ohaasaSystem;
 
 import javax.swing.*;
+import java.util.List;
 import java.awt.*;
-import data.HoroscopeData;
 import model.Horoscope;
 import model.User;
+import data.HoroscopeData;
 import java.util.Optional;
 import java.util.Calendar;
 
@@ -42,11 +43,13 @@ public class MainView extends JFrame {
         add(titleLabel, BorderLayout.NORTH);
         
         // 사용자 별자리 가져오기
+        List<Horoscope> horoscopeList = new HoroscopeData().getTodayHoroscopes();
+
+        // 사용자 별자리 가져오기
         String zodiac = currentUser.getZodiacSign();
-        Optional<Horoscope> opt = HoroscopeData.getDummyData()
-                .stream()
-                .filter(h -> h.getZodiacSign().equals(zodiac))
-                .findFirst();
+        Optional<Horoscope> opt = horoscopeList.stream()
+        	    .filter(h -> h.getZodiacSign().trim().equalsIgnoreCase(zodiac.trim()))
+        	    .findFirst();
         
         // 중앙 패널
         JPanel centerPanel = new JPanel(new BorderLayout());
@@ -64,10 +67,7 @@ public class MainView extends JFrame {
             infoArea.setEditable(false);
             infoArea.setLineWrap(true);
             infoArea.setWrapStyleWord(true);
-            infoArea.setText(
-                "[조언]\n\n" + h.getAdvice() + "\n\n\n" +
-                "[행운의 행동]\n\n" + h.getAction()
-            );
+            infoArea.setText("\n[조언 및 행운의 행동]\n\n" + h.getAdvice());
 
             infoArea.setFont(new Font("Pretendard", Font.PLAIN, 16));
             
@@ -97,7 +97,7 @@ public class MainView extends JFrame {
         goRankButton.setBackground(new Color(170, 210, 250));
         goRankButton.setFocusPainted(false);
         goRankButton.addActionListener(e -> {
-            new RankView(currentUser).setVisible(true);
+        	new RankView(currentUser).setVisible(true);
             dispose();
         });
 

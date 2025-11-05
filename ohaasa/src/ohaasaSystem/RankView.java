@@ -34,7 +34,7 @@ public class RankView extends JFrame {
         setLocationRelativeTo(null);
 
         // 데이터 불러오기
-        horoscopeList = HoroscopeData.getDummyData();
+        horoscopeList = new HoroscopeData().getTodayHoroscopes();
 
         // 테이블 모델 생성 (순위, 별자리만 표시)
         String[] columnNames = {"순위", "별자리"};
@@ -71,8 +71,7 @@ public class RankView extends JFrame {
                     Horoscope selected = horoscopeList.get(selectedRow);
                     String message = 
                         selected.getRank() + "위 " + selected.getZodiacSign() + "\n\n" +
-                        "[조언] " + selected.getAdvice() + "\n\n" +
-                        "[행운의 행동] " + selected.getAction();
+                        "[조언 및 행운의 행동] " + "\n" +selected.getAdvice();
                     JOptionPane.showMessageDialog(
                         RankView.this,
                         message,

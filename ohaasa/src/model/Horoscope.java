@@ -4,13 +4,11 @@ public class Horoscope {
 	private int rank;
 	private String zodiacSign;
 	private String advice;
-	private String action;
 	
-	public Horoscope(int rank, String zodiacSign, String advice, String action) {
+	public Horoscope(int rank, String zodiacSign, String advice) {
         this.rank = rank;
         this.zodiacSign = zodiacSign;
         this.advice = advice;
-        this.action = action;
     }
 
     // Getter & Setter
@@ -38,16 +36,8 @@ public class Horoscope {
         this.advice = advice;
     }
 
-    public String getAction() {
-        return action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
-    }
-
     @Override
     public String toString() {
-        return rank + "위 " + zodiacSign + " - " + advice + " (" + action + ")";
+        return rank + "위 " + zodiacSign + " - " + advice;
     }
 }

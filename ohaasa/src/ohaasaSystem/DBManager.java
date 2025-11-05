@@ -1,11 +1,15 @@
 package ohaasaSystem;
 
 import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Properties;
 import java.io.InputStream;
 import model.User;
 import model.DiaryEntry;
+import model.Horoscope;
+import java.util.*;
 
 public class DBManager {
     private static String URL;
@@ -37,6 +41,10 @@ public class DBManager {
         } catch (ClassNotFoundException e) {
             throw new SQLException("MySQL Driver not found", e);
         }
+    }
+    
+    public Connection getDBConnection() throws SQLException {
+        return getConnection(); // private getConnection() 호출
     }
     
     // 회원가입 처리
@@ -127,17 +135,16 @@ public class DBManager {
     
     // 일기 저장
     public boolean saveDiary(String userId, LocalDate date, String content, String imagePath,
-            String zodiacSign, int rank, String advice, String action) {
+            String zodiacSign, int rank, String advice) {
 		String sql = """
-		INSERT INTO diaries (user_id, diary_date, content, image_path, zodiac_sign, horoscope_rank, horoscope_advice, horoscope_action)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO diaries (user_id, diary_date, content, image_path, zodiac_sign, horoscope_rank, horoscope_advice)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
 		ON DUPLICATE KEY UPDATE
 		content = VALUES(content),
 		image_path = VALUES(image_path),
 		zodiac_sign = VALUES(zodiac_sign),
 		horoscope_rank = VALUES(horoscope_rank),
-		horoscope_advice = VALUES(horoscope_advice),
-		horoscope_action = VALUES(horoscope_action)
+		horoscope_advice = VALUES(horoscope_advice)
 		""";
 		
 		try (Connection conn = getConnection();
@@ -149,7 +156,6 @@ public class DBManager {
 			pstmt.setString(5, zodiacSign);
 			pstmt.setInt(6, rank);
 			pstmt.setString(7, advice);
-			pstmt.setString(8, action);
 			
 			pstmt.executeUpdate();
 			return true;
@@ -162,7 +168,7 @@ public class DBManager {
     // 다이어리 불러오기
     public DiaryEntry getDiaryEntry(String userId, LocalDate date) {
         String sql = """
-            SELECT content, image_path, zodiac_sign, horoscope_rank, horoscope_advice, horoscope_action
+            SELECT content, image_path, zodiac_sign, horoscope_rank, horoscope_advice
             FROM diaries WHERE user_id = ? AND diary_date = ?
             """;
 
@@ -180,7 +186,6 @@ public class DBManager {
                 entry.setZodiacSign(rs.getString("zodiac_sign"));
                 entry.setHoroscopeRank(rs.getInt("horoscope_rank"));
                 entry.setAdvice(rs.getString("horoscope_advice"));
-                entry.setAction(rs.getString("horoscope_action"));
                 return entry;
             }
         } catch (SQLException e) {

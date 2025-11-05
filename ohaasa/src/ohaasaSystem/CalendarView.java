@@ -8,17 +8,17 @@ import model.User;
 
 public class CalendarView extends JFrame {
 
-	private User currentUser;
+    private User currentUser;
     private LocalDate currentDate = LocalDate.now();
     private JPanel calendarPanel;
     private JLabel monthLabel;
     DBManager dbManager = new DBManager();
 
     public CalendarView(User user) {
-    	this.currentUser = user;
-    	
+        this.currentUser = user;
+
         setTitle("오하아사 - 일기 캘린더");
-        setSize(500, 450);
+        setSize(500, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -50,8 +50,38 @@ public class CalendarView extends JFrame {
         calendarPanel.setBackground(Color.WHITE);
         add(calendarPanel, BorderLayout.CENTER);
         calendarPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
-        
-        // 메세지 창 폰트 설정
+
+        // 하단: 버튼 2개 구성
+        JButton goMainButton = new JButton("나의 오하아사 확인하기");
+        goMainButton.setFont(new Font("Pretendard", Font.BOLD, 14));
+        goMainButton.setBackground(new Color(170, 210, 250));
+        goMainButton.setFocusPainted(false);
+        goMainButton.addActionListener(e -> {
+            new MainView(currentUser).setVisible(true);
+            dispose();
+        });
+
+        JButton goRankButton = new JButton("전체 순위 보러가기");
+        goRankButton.setFont(new Font("Pretendard", Font.BOLD, 14));
+        goRankButton.setBackground(new Color(170, 210, 250));
+        goRankButton.setFocusPainted(false);
+        goRankButton.addActionListener(e -> {
+        	new MainView(currentUser).setVisible(true);
+            dispose();
+        });
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 10, 40));
+        buttonPanel.add(goMainButton);
+        buttonPanel.add(goRankButton);
+
+        JPanel southPanel = new JPanel(new BorderLayout());
+        southPanel.setBackground(Color.WHITE);
+        southPanel.add(buttonPanel, BorderLayout.SOUTH);
+        add(southPanel, BorderLayout.SOUTH);
+
+        // 메시지 폰트 설정
         UIManager.put("OptionPane.messageFont", new Font("Pretendard", Font.PLAIN, 14));
         UIManager.put("OptionPane.buttonFont", new Font("Pretendard", Font.BOLD, 12));
 
@@ -78,10 +108,10 @@ public class CalendarView extends JFrame {
 
         // 해당 월의 시작 요일과 마지막 날짜 계산
         LocalDate firstDay = currentDate.withDayOfMonth(1);
-        int startDay = firstDay.getDayOfWeek().getValue() % 7; // 일요일=0
+        int startDay = firstDay.getDayOfWeek().getValue() % 7;
         int lastDay = currentDate.lengthOfMonth();
 
-        // 빈 칸 채우기 (시작 전 공백)
+        // 빈 칸
         for (int i = 0; i < startDay; i++) {
             calendarPanel.add(new JLabel(""));
         }
@@ -93,36 +123,27 @@ public class CalendarView extends JFrame {
             dayBtn.setFocusPainted(false);
             dayBtn.setBackground(Color.WHITE);
 
-            // 오늘 날짜 강조
             boolean isToday = date.equals(LocalDate.now());
             if (isToday) {
                 dayBtn.setBorder(BorderFactory.createLineBorder(new Color(170, 210, 250), 2));
                 dayBtn.setBackground(new Color(200, 230, 255));
             }
-            
-            // 일기 작성 여부 확인
+
             String diary = dbManager.getDiary(currentUser.getUserId(), date);
             if (diary != null) {
                 String htmlText = "<html>" + day + "<font color='#54a6dd'> ●</font></html>";
                 dayBtn.setText(htmlText);
-            } else {
-                // 일기 없는 날은 기본 숫자
-                dayBtn.setText(String.valueOf(day));
             }
 
-            // 버튼 클릭 시 팝업
             dayBtn.addActionListener(e -> {
-            	if (date.equals(LocalDate.now())) {
+                if (date.equals(LocalDate.now())) {
                     String content = dbManager.getDiary(currentUser.getUserId(), date);
                     if (content != null) {
-                        // 이미 작성된 오늘 일기가 있으면 읽기 전용으로 보기
                         new DiaryViewerDialog(this, date, currentUser, dbManager).setVisible(true);
                     } else {
-                        // 아직 작성 안 한 오늘 일기면 작성 가능
                         new DiaryDialog(this, date, currentUser, dbManager).setVisible(true);
                     }
                 } else {
-                    // 과거 날짜는 항상 읽기 전용
                     new DiaryViewerDialog(this, date, currentUser, dbManager).setVisible(true);
                 }
             });

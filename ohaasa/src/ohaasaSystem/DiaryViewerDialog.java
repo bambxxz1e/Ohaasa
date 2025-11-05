@@ -37,9 +37,9 @@ public class DiaryViewerDialog extends JDialog {
 
         if (diary != null && diary.getZodiacSign() != null) {
             horoscopeArea.setText(
-                    String.format("%d위 %s\n\n[조언]\n%s\n\n[행운의 행동]\n%s",
+                    String.format("%d위 %s\n\n[조언 및 행운의 행동]\n%s",
                     		diary.getHoroscopeRank(), diary.getZodiacSign(),
-                            diary.getAdvice(), diary.getAction()));
+                            diary.getAdvice()));
         } else {
             horoscopeArea.setText("운세 정보가 없습니다.");
         }
